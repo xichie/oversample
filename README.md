@@ -1,2 +1,2 @@
 # oversample
-gando and d2gao model
+GANDO and D2GAO demo
