@@ -46,17 +46,17 @@ class GAN():
         optimizer = Adam(0.0002, 0.5)
 
         self.M = self.build_M()
-        self.M.compile(loss='mse',
+        self.M.compile(loss='categorical_crossentropy',
                        optimizer=optimizer,
                        metrics=['accuracy'])
 
         self.discriminator1 = self.build_discriminator()
-        self.discriminator1.compile(loss='mse',
+        self.discriminator1.compile(loss=d1_loss,
                                     optimizer=optimizer,
                                     metrics=['accuracy'])
 
         self.discriminator2 = self.build_discriminator()
-        self.discriminator2.compile(loss='mse',
+        self.discriminator2.compile(loss=d2_loss,
                                     optimizer=optimizer,
                                     metrics=['accuracy'])
         # Build the generator
@@ -68,17 +68,17 @@ class GAN():
         self.M.trainable = False
         validity = self.M(img)
         self.combined = Model(z, validity)
-        self.combined.compile(loss='mse', optimizer=optimizer)
+        self.combined.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
         self.discriminator1.trainable = False
         dis1 = self.discriminator1(img)
         self.combined1 = Model(z, dis1)
-        self.combined1.compile(loss='mse', optimizer=optimizer)
+        self.combined1.compile(loss=d1_loss, optimizer=optimizer)
 
         self.discriminator2.trainable = False
         dis2 = self.discriminator2(img)
         self.combined2 = Model(z, dis2)
-        self.combined2.compile(loss='mse', optimizer=optimizer)
+        self.combined2.compile(loss=d2_loss, optimizer=optimizer)
 
  	
 
@@ -163,8 +163,16 @@ class GAN():
             # Plot the progress
             print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100 * d_loss[1], g_loss))
 
+# def discriminator loss            
+def d1_loss(y_true, y_pred):
+    return K.mean(-0.1 * y_true * K.log(y_pred + 1e-5) + (1 - y_true) * (y_pred + 1e-5), axis=-1)
+def d2_loss(y_true, y_pred):
+    return y_true * (y_pred+1e-5) - 0.05 * (1-y_true) * K.log(y_pred + 1e-5)
+
+
+
 if __name__ == '__main__':
-    data_path = '../data/segment0/'
+    data_path = 'data/segment0'
     train, test = load_data(data_path)
 
     history = []

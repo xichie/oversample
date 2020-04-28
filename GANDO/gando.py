@@ -47,7 +47,7 @@ class GAN():
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
-        self.discriminator.compile(loss='mse',
+        self.discriminator.compile(loss='categorical_crossentropy',
                                    optimizer=optimizer,
                                    metrics=['accuracy'])
 
@@ -68,10 +68,11 @@ class GAN():
         # Trains the generator to fool the discriminator
         self.combined = Model(z, validity)
 
-        self.combined.add_loss(self.my_loss(img))
-        self.combined.compile(loss='mse', optimizer=optimizer)
+        self.combined.add_loss(self.within_class_scatter(img))
+        self.combined.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
-    def my_loss(self, x_fake):
+    # 类内散度计算
+    def within_class_scatter(self, x_fake):
         m_dot = K.mean(x_fake)
         loss = K.log(1 - K.mean((x_fake - m_dot) ** 2))
         return 0.01 * loss
