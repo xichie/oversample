@@ -167,7 +167,7 @@ class GAN():
 def d1_loss(y_true, y_pred):
     return K.mean(-0.1 * y_true * K.log(y_pred + 1e-5) + (1 - y_true) * (y_pred + 1e-5), axis=-1)
 def d2_loss(y_true, y_pred):
-    return y_true * (y_pred+1e-5) - 0.05 * (1-y_true) * K.log(y_pred + 1e-5)
+    return K.mean(y_true * (y_pred+1e-5) - 0.05 * (1-y_true) * K.log(y_pred + 1e-5), axis=-1)
 
 
 
